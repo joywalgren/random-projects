@@ -16,11 +16,21 @@ int main(int argc, const char *argv[])
 {
     bool endGame = false;
     int grid[4][4]; //[row][collum]
+    int direction;
     vector<pair<int, int>> zeros;
     startingGrid(grid,zeros, endGame);
+    print(grid); 
+    while (endGame == false)
+    {
+        cin >> direction;
+        move(grid, zeros, direction);
+        placeNew(grid,zeros,endGame);
+        print(grid);
+    }
+    
     // int direction = fillgrid(grid, zeros);
     // move(grid, zeros, direction);
-    print(grid);
+
 
     // cout << direction;
 
@@ -47,7 +57,7 @@ void placeNew(int grid[4][4], vector<pair<int, int>> &zeros, bool endGame)
     { 
         int randomPlace = rand() % 16;
         int whereIsTheZero = isZero({randomPlace/4, randomPlace%4}, zeros);
-        while ( whereIsTheZero == -1)
+        while (whereIsTheZero == -1)
         {
             randomPlace = rand() % 16;
             whereIsTheZero = isZero({randomPlace/4, randomPlace%4}, zeros);
@@ -62,11 +72,21 @@ void placeNew(int grid[4][4], vector<pair<int, int>> &zeros, bool endGame)
             number = 2;
         }
         grid[randomPlace/4][randomPlace%4] = number;
+        // cout << number << " was placed at (" << randomPlace/4 << "," << randomPlace%4 << ")\n";
+        // cout << "size of zero: " << zeros.size() << endl;
+        // int i = 0;
+        // for (const pair<int, int> &p : zeros) {
+        //     cout << "i = " << i << endl;
+        //     i++;
+        //     cout << "(" << p.first << ", " << p.second << ")" << endl;
+        //     }
+        // cout<< "where is zero: " << whereIsTheZero<< endl;
         zeros.erase(zeros.begin()+ whereIsTheZero); //this may cause an off by 1 issue if whereIsZero + begin give a different result then i want
     }
     else
     {
-        cout << "Trigger end game\n";
+        cout<< "trigger endGame\n";
+        endGame = true;
     }
 }
 int isZero (pair<int,int> checkNumber, vector<pair<int, int>> &zeros)
