@@ -7,39 +7,52 @@
 
 using namespace std;
 int fillgrid(int grid[4][4], vector<pair<int, int>> &zeros);
-void startingGrid(int grid[4][4], vector<pair<int, int>> &zeros, bool endGame);
+void startingGrid(int grid[4][4], vector<pair<int, int>> &zeros);
 void print(int grid[4][4]);
-void move(int grid[4][4], vector<pair<int, int>> &zeros, int direction);
-void placeNew(int grid[4][4], vector<pair<int, int>> &zeros, bool endGame);
+void move(int grid[4][4], vector<pair<int, int>> &zeros, char direction);
+void moveAction(int grid[4][4], vector<pair<int, int>> &zeros, bool& endGame);
+void placeNew(int grid[4][4], vector<pair<int, int>> &zeros);
 int isZero(pair<int, int> checkNumber, vector<pair<int, int>> &zeros);
+bool isValidMove(int grid[4][4], int direction);
 
 int main(int argc, const char *argv[])
 {
-    // bool endGame = false;
-    int grid[4][4]; //[row][collum]
-    int direction;
+    bool endGame = false;
+    int grid[4][4]; //[row][column]
     vector<pair<int, int>> zeros;
-    // startingGrid(grid,zeros, endGame);
-    // print(grid);
-    // while (endGame != true)
-    // {
-    //     cin >> direction;
-    //     move(grid, zeros, direction);
-    //     placeNew(grid,zeros,endGame);
-    //     cout << endGame << " endgame condition\n";
-    //     print(grid);
-    // }
-
-    direction = fillgrid(grid, zeros);
-    move(grid,zeros, direction);
+    startingGrid(grid,zeros);
     print(grid);
-    // int direction = fillgrid(grid, zeros);
-    // move(grid, zeros, direction);
+    do
+    {
+        moveAction(grid, zeros, endGame);
+    }
+    while (endGame != true);
+
+
 
     return 0;
 }
 
-void startingGrid(int grid[4][4], vector<pair<int, int>> &zeros, bool endGame)
+bool isValidMove(int grid[4][4], int direction)
+{
+    int tempGrid[4][4];
+    copy(&grid[0][0], &grid[0][0] + 4 * 4, &tempGrid[0][0]);
+    vector<pair<int,int>> tempZeros;
+    move(tempGrid, tempZeros, direction);
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            if (grid[i][j] != tempGrid[i][j])
+            {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+void startingGrid(int grid[4][4], vector<pair<int, int>> &zeros)
 {
     fill(&grid[0][0], &grid[0][0] + 4 * 4, 0);
     for (int i = 0; i < 4; i++)
@@ -50,10 +63,10 @@ void startingGrid(int grid[4][4], vector<pair<int, int>> &zeros, bool endGame)
         }
     }
     srand(time(0)); // seeding the random number generator with time
-    placeNew(grid, zeros, endGame);
-    placeNew(grid, zeros, endGame);
+    placeNew(grid, zeros);
+    placeNew(grid, zeros);
 }
-void placeNew(int grid[4][4], vector<pair<int, int>> &zeros, bool endGame)
+void placeNew(int grid[4][4], vector<pair<int, int>> &zeros)
 {
     if (zeros.size() > 0)
     {
@@ -74,29 +87,25 @@ void placeNew(int grid[4][4], vector<pair<int, int>> &zeros, bool endGame)
             number = 2;
         }
         grid[randomPlace / 4][randomPlace % 4] = number;
-        // cout << number << " was placed at (" << randomPlace / 4 << "," << randomPlace % 4 << ")\n";
-        // cout << "size of zero: " << zeros.size() << endl;
-        int i = 0;
-        for (const pair<int, int> &p : zeros)
-        {
-            cout << "i = " << i << endl;
-            i++;
-            cout << "(" << p.first << ", " << p.second << ")" << endl;
-        }
-        cout << "where is zero: " << whereIsTheZero << endl;
+        // int i = 0;
+        // for (const pair<int, int> &p : zeros)
+        // {
+        //     cout << "i = " << i << endl;
+        //     i++;
+        //     cout << "(" << p.first << ", " << p.second << ")" << endl;
+        // }
         zeros.erase(zeros.begin() + whereIsTheZero); // this may cause an off by 1 issue if whereIsZero + begin give a different result then i want
-        i = 0;
-        for (const pair<int, int> &p : zeros)
-        {
-            cout << "i = " << i << endl;
-            i++;
-            cout << "(" << p.first << ", " << p.second << ")" << endl;
-        }
+        // i = 0;
+        // for (const pair<int, int> &p : zeros)
+        // {
+        //     cout << "i = " << i << endl;
+        //     i++;
+        //     cout << "(" << p.first << ", " << p.second << ")" << endl;
+        // }
     }
     else
     {
-        cout << "trigger endGame\n";
-        endGame = true;
+        cout << "trigger endGame\n (This is from adding zeros, not where it is supposed to trigger endgame)\n";
     }
 }
 int isZero(pair<int, int> checkNumber, vector<pair<int, int>> &zeros)
@@ -113,7 +122,7 @@ int isZero(pair<int, int> checkNumber, vector<pair<int, int>> &zeros)
 
 int fillgrid(int grid[4][4], vector<pair<int, int>> &zeros)
 {
-    int direction;
+    char direction;
     for (int i = 0; i < 16; i++)
     { // read in 16 numbers
 
@@ -131,19 +140,56 @@ void print(int grid[4][4])
     for (int i = 0; i < 16; i++)
     { // read out 16 numbers
         int number = grid[i / 4][i % 4]; 
-        cout << number << " ";
-        // cout << setw(4) << number << " ";
+        // cout << number << " ";
+        cout  << setw(5) << number;
         if (((i + 1) / 4) > (i / 4))
             cout << endl;
     }
 }
-
-void move(int grid[4][4], vector<pair<int, int>> &zeros, int direction)
+void moveAction (int grid[4][4], vector<pair<int, int>> &zeros, bool& endGame)
 {
+    char movesAvailable[4] = {'a','w','d','s'};
+    bool thereAreMovesRemaining = false;
+    for (int i = 0; i < 4; i++) //this one checks every possibility to see if there are any moves available
+    {
+        if(isValidMove(grid, movesAvailable[i])==true)
+        {
+            thereAreMovesRemaining = true;
+            break;
+        }
+    }
+    if(thereAreMovesRemaining == false)
+    {
+        endGame = true;
+        cout << "The End\n";
+    }
+    else
+    {
+        char direction;
+        cin >> direction;
+
+        while ((direction != 'a' && direction != 'w'&& direction != 'd' && direction != 's')|| cin.peek() != '\n'|| isValidMove(grid, direction) == false)
+        {
+            cout <<"not a valid direction.\nTry again\n";
+            cin >> direction;
+        } 
+        move(grid, zeros, direction);
+        placeNew(grid, zeros);
+        print(grid);
+
+    }
+    // if false endgame
+
+
+}
+
+void move(int grid[4][4], vector<pair<int, int>> &zeros, char direction)
+{
+
     bool isCombined[4][4];
     switch (direction)
     {
-    case 0: // left
+    case 'a': // left
         fill(&isCombined[0][0], &isCombined[0][0] + 4 * 4, false);
         for (int i = 0; i < 4; i++) // iterate through the rows
         {
@@ -179,7 +225,7 @@ void move(int grid[4][4], vector<pair<int, int>> &zeros, int direction)
             }
         }
         break;
-    case 1: // up
+    case 'w': // up
         fill(&isCombined[0][0], &isCombined[0][0] + 4 * 4, false);
         for (int i = 0; i < 4; i++) // iterate through the rows
         {
@@ -214,7 +260,7 @@ void move(int grid[4][4], vector<pair<int, int>> &zeros, int direction)
             }
         }
         break;
-    case 2: // right
+    case 'd': // right
         fill(&isCombined[0][0], &isCombined[0][0] + 4 * 4, false);
         for (int i = 0; i < 4; i++) // iterate through the rows
         {
@@ -250,7 +296,7 @@ void move(int grid[4][4], vector<pair<int, int>> &zeros, int direction)
             }
         }
         break;
-    case 3: // down
+    case 's': // down
         fill(&isCombined[0][0], &isCombined[0][0] + 4 * 4, false);
         for (int i = 0; i < 4; i++) // iterate through the rows
         {
