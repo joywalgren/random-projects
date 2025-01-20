@@ -4,6 +4,7 @@
 #include <fstream>
 #include <vector>
 #include <algorithm>
+#include <stdlib.h>
 
 using namespace std;
 int fillgrid(int grid[4][4], vector<pair<int, int>> &zeros);
@@ -20,6 +21,8 @@ int main(int argc, const char *argv[])
     bool endGame = false;
     int grid[4][4]; //[row][column]
     vector<pair<int, int>> zeros;
+    system("clear");
+    cout <<"WELCOME TO 2048\n";
     startingGrid(grid,zeros);
     print(grid);
     do
@@ -166,15 +169,19 @@ void moveAction (int grid[4][4], vector<pair<int, int>> &zeros, bool& endGame)
     else
     {
         char direction;
-        cin >> direction;
+        string input;
+        cout << "Enter direction:\n(w,a,s,d)\n";
+        getline(cin, input);
 
-        while ((direction != 'a' && direction != 'w'&& direction != 'd' && direction != 's')|| cin.peek() != '\n'|| isValidMove(grid, direction) == false)
+        while ((input[0] != 'a' && input[0] != 'w'&& input[0] != 'd' && input[0] != 's')|| input.length() != 1|| isValidMove(grid, input[0]) == false)
         {
             cout <<"not a valid direction.\nTry again\n";
-            cin >> direction;
+            getline(cin, input);
         } 
+        direction = input[0];
         move(grid, zeros, direction);
         placeNew(grid, zeros);
+        system("clear");
         print(grid);
 
     }
